@@ -1,72 +1,31 @@
 /* globals describe it */
 
 import assert from 'assert'
-import { calculateTargetRunwayDeposit } from '../src/pay/calculate-target-runway-deposit.ts'
+import { calculateTargetRunwayDeposit } from '../src/pay/index.ts'
+
+const params = {
+  availableFunds: 0n,
+  debt: 0n,
+  lockupRatePerEpoch: 10n,
+  targetRunwayInEpochs: 50n,
+}
 
 describe('calculateTargetRunwayDeposit', () => {
   it('returns the exact shortfall for a healthy underfunded account', () => {
-    const result = calculateTargetRunwayDeposit({
-      availableFunds: 400n,
-      debt: 0n,
-      lockupRatePerEpoch: 10n,
-      targetRunwayInEpochs: 50n,
-    })
-
-    assert.equal(result, 100n)
+    assert.equal(calculateTargetRunwayDeposit({ ...params, availableFunds: 400n }), 100n)
   })
 
-  it('returns zero when the requested runway is already covered', () => {
-    const result = calculateTargetRunwayDeposit({
-      availableFunds: 600n,
-      debt: 0n,
-      lockupRatePerEpoch: 10n,
-      targetRunwayInEpochs: 50n,
-    })
-
-    assert.equal(result, 0n)
+  it('returns zero when the target is exactly met or exceeded', () => {
+    for (const availableFunds of [500n, 600n]) {
+      assert.equal(calculateTargetRunwayDeposit({ ...params, availableFunds }), 0n)
+    }
   })
 
   it('includes current debt for an account in deficit', () => {
-    const result = calculateTargetRunwayDeposit({
-      availableFunds: 0n,
-      debt: 75n,
-      lockupRatePerEpoch: 10n,
-      targetRunwayInEpochs: 50n,
-    })
-
-    assert.equal(result, 575n)
+    assert.equal(calculateTargetRunwayDeposit({ ...params, debt: 75n }), 575n)
   })
 
   it('does not create a runway requirement when the per-epoch rate is zero', () => {
-    const result = calculateTargetRunwayDeposit({
-      availableFunds: 0n,
-      debt: 0n,
-      lockupRatePerEpoch: 0n,
-      targetRunwayInEpochs: 1_000_000n,
-    })
-
-    assert.equal(result, 0n)
-  })
-
-  it('still clears current debt when the per-epoch rate is zero', () => {
-    const result = calculateTargetRunwayDeposit({
-      availableFunds: 0n,
-      debt: 75n,
-      lockupRatePerEpoch: 0n,
-      targetRunwayInEpochs: 1_000_000n,
-    })
-
-    assert.equal(result, 75n)
-  })
-
-  it('returns zero at the exact funding boundary', () => {
-    const result = calculateTargetRunwayDeposit({
-      availableFunds: 500n,
-      debt: 0n,
-      lockupRatePerEpoch: 10n,
-      targetRunwayInEpochs: 50n,
-    })
-
-    assert.equal(result, 0n)
+    assert.equal(calculateTargetRunwayDeposit({ ...params, lockupRatePerEpoch: 0n }), 0n)
   })
 })
