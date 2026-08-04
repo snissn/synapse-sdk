@@ -27,5 +27,9 @@ describe('calculateTargetRunwayDeposit', () => {
 
   it('does not create a runway requirement when the per-epoch rate is zero', () => {
     assert.equal(calculateTargetRunwayDeposit({ ...params, lockupRatePerEpoch: 0n }), 0n)
+    assert.equal(
+      calculateTargetRunwayDeposit({ ...params, availableFunds: 50n, debt: 75n, lockupRatePerEpoch: 0n }),
+      25n
+    )
   })
 })
