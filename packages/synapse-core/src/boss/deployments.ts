@@ -7,11 +7,12 @@ import { BOSS_ACCOUNT_CREATION_CODE_HASH } from './generated.ts'
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 const nonZeroAddressSchema = zAddress.refine((value) => value !== ZERO_ADDRESS, 'Zero address')
 const commitSchema = z.string().regex(/^[0-9a-f]{40}$/)
+const hashSchema = zHex.refine((value) => value.length === 66, 'Expected bytes32')
 const deploymentSchema = z
   .object({
     address: nonZeroAddressSchema,
-    runtimeCodeHash: zHex,
-    deploymentTxHash: zHex,
+    runtimeCodeHash: hashSchema,
+    deploymentTxHash: hashSchema,
     deploymentBlock: z.number().int().nonnegative(),
   })
   .strict()
@@ -22,7 +23,7 @@ export const bossDeploymentManifestSchema = z
     network: z.string().min(1),
     chainId: z.number().int().positive(),
     protocolCommit: commitSchema,
-    accountCreationCodeHash: zHex,
+    accountCreationCodeHash: hashSchema,
     deploymentBlock: z.number().int().nonnegative().optional(),
     dependencies: z
       .object({
