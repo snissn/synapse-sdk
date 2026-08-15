@@ -31,21 +31,30 @@ jobs:
       - name: Install exact workspace
         run: pnpm install --no-frozen-lockfile
 
-      - name: Package exact source and dependencies
+      - name: Package exact source and synapse-core dependencies
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p /tmp/b0-devkit /tmp/b0-pnpm
-          tar --exclude=.git --exclude='**/dist' -czf /tmp/b0-devkit/repository-with-node-modules.tar.gz .
+          mkdir -p /tmp/b0-source /tmp/b0-deps /tmp/b0-pnpm
+          tar --exclude=.git --exclude='**/node_modules' --exclude='**/dist' -czf /tmp/b0-source/repository.tar.gz .
+          tar --dereference -C packages/synapse-core -czf /tmp/b0-deps/synapse-core-node-modules.tar.gz node_modules
           cp -aL "$PNPM_HOME/." /tmp/b0-pnpm/
-          tar -C /tmp/b0-pnpm -czf /tmp/b0-devkit/pnpm-home.tar.gz .
-          git rev-parse HEAD > /tmp/b0-devkit/source-head.txt
-          cd /tmp/b0-devkit
-          sha256sum repository-with-node-modules.tar.gz pnpm-home.tar.gz source-head.txt > SHA256SUMS
+          tar -C /tmp/b0-pnpm -czf /tmp/b0-deps/pnpm-home.tar.gz .
+          git rev-parse HEAD > /tmp/b0-source/source-head.txt
+          sha256sum /tmp/b0-source/* > /tmp/b0-source/SHA256SUMS
+          sha256sum /tmp/b0-deps/* > /tmp/b0-deps/SHA256SUMS
+          du -h /tmp/b0-source/* /tmp/b0-deps/*
 
       - uses: actions/upload-artifact@v4
         with:
-          name: b0-devkit
-          path: /tmp/b0-devkit/
+          name: b0-source-exact
+          path: /tmp/b0-source/
+          if-no-files-found: error
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: b0-synapse-core-deps
+          path: /tmp/b0-deps/
           if-no-files-found: error
           retention-days: 1
