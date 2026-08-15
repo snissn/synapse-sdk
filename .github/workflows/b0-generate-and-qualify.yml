@@ -30,7 +30,7 @@ jobs:
           node-version: lts/*
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Generate exact Boss artifacts
         shell: bash
