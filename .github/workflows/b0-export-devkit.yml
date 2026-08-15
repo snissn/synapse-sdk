@@ -1,0 +1,52 @@
+name: Export B0 development kit
+
+on:
+  push:
+    branches:
+      - gpt56/issue-5-boss-core-wire-format
+    paths:
+      - .github/workflows/b0-export-devkit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.3
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install exact workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Package exact source and dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/b0-devkit /tmp/b0-pnpm
+          tar --exclude=.git --exclude='**/dist' -czf /tmp/b0-devkit/repository-with-node-modules.tar.gz .
+          cp -aL "$PNPM_HOME/." /tmp/b0-pnpm/
+          tar -C /tmp/b0-pnpm -czf /tmp/b0-devkit/pnpm-home.tar.gz .
+          git rev-parse HEAD > /tmp/b0-devkit/source-head.txt
+          cd /tmp/b0-devkit
+          sha256sum repository-with-node-modules.tar.gz pnpm-home.tar.gz source-head.txt > SHA256SUMS
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: b0-devkit
+          path: /tmp/b0-devkit/
+          if-no-files-found: error
+          retention-days: 1
