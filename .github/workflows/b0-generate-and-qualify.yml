@@ -1,0 +1,104 @@
+name: Generate and qualify B0
+
+on:
+  push:
+    branches:
+      - gpt56/issue-5-boss-core-wire-format
+    paths:
+      - .github/workflows/b0-generate-and-qualify.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: b0-generate-and-qualify
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate exact Boss artifacts
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import urllib.request
+          from pathlib import Path
+
+          source_commit = '4a7bd35801ea6bc0521f942f48a9b7a713172bc0'
+          root = f'https://raw.githubusercontent.com/snissn/filecoin-boss/{source_commit}/packages/contracts'
+
+          def read(path: str) -> str:
+              with urllib.request.urlopen(f'{root}/{path}') as response:
+                  return response.read().decode()
+
+          artifacts = json.loads(read('artifacts.json'))
+          if artifacts['sourceCommit'] != source_commit or artifacts['protocolCommit'] != source_commit:
+              raise SystemExit('unexpected Boss artifact source commit')
+
+          creation = read('bytecode/BossAccount.creation.hex').strip()
+          names = {}
+          exports = []
+          for entry in artifacts['contracts']:
+              name = entry['name']
+              variable = name[0].lower() + name[1:] + 'Abi'
+              names[name] = variable
+              abi = json.loads(read(entry['abi']))
+              exports.append(f"export const {variable} = {json.dumps(abi, separators=(',', ':'))} as const")
+
+          lines = [
+              "import type { Abi, Hex } from 'viem'",
+              '',
+              f'/** Generated from snissn/filecoin-boss source commit {source_commit}. */',
+              f"export const BOSS_ARTIFACT_SOURCE_COMMIT = '{source_commit}'",
+              f"export const BOSS_ACCOUNT_CREATION_CODE_HASH = '{artifacts['accountCreationCodeHash']}' as Hex",
+              f"export const bossAccountCreationCode = '{creation}' as Hex",
+              '',
+              '\n\n'.join(exports),
+              '',
+              'export const bossAbis = {',
+          ]
+          lines.extend(f'  {name}: {variable},' for name, variable in names.items())
+          lines.extend([
+              '} as const satisfies Record<string, Abi>',
+              '',
+              f"export const bossArtifacts = {json.dumps(artifacts, separators=(',', ':'))} as const",
+              '',
+          ])
+          Path('packages/synapse-core/src/boss/generated.ts').write_text('\n'.join(lines))
+          PY
+
+      - name: Format, build, and test
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm --filter @filoz/synapse-core run lint:fix
+          pnpm --filter @filoz/synapse-core run build
+          pnpm --filter @filoz/synapse-core run test:node
+          pnpm --filter @filoz/synapse-core run test:browser
+
+      - name: Commit qualified implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/synapse-core
+          git diff --cached --check
+          git commit -m "feat(synapse-core): implement Boss wire-format substrate"
+          git push origin HEAD:gpt56/issue-5-boss-core-wire-format
