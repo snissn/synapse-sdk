@@ -40,8 +40,9 @@ jobs:
           import urllib.request
           from pathlib import Path
 
+          artifact_commit = '4295d48f322d5c8950c01fa6f6d92d2391156d19'
           source_commit = '4a7bd35801ea6bc0521f942f48a9b7a713172bc0'
-          root = f'https://raw.githubusercontent.com/snissn/filecoin-boss/{source_commit}/packages/contracts'
+          root = f'https://raw.githubusercontent.com/snissn/filecoin-boss/{artifact_commit}/packages/contracts'
 
           def read(path: str) -> str:
               with urllib.request.urlopen(f'{root}/{path}') as response:
@@ -64,7 +65,8 @@ jobs:
           lines = [
               "import type { Abi, Hex } from 'viem'",
               '',
-              f'/** Generated from snissn/filecoin-boss source commit {source_commit}. */',
+              f'/** Generated from snissn/filecoin-boss artifact commit {artifact_commit}. */',
+              f"export const BOSS_ARTIFACT_PUBLICATION_COMMIT = '{artifact_commit}'",
               f"export const BOSS_ARTIFACT_SOURCE_COMMIT = '{source_commit}'",
               f"export const BOSS_ACCOUNT_CREATION_CODE_HASH = '{artifacts['accountCreationCodeHash']}' as Hex",
               f"export const bossAccountCreationCode = '{creation}' as Hex",
