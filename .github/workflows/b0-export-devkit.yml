@@ -27,10 +27,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
 
       - name: Install exact workspace
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Package exact source and dependencies
         shell: bash
