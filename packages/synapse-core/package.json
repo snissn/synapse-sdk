@@ -29,6 +29,10 @@
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
     },
+    "./boss": {
+      "types": "./dist/src/boss/index.d.ts",
+      "default": "./dist/src/boss/index.js"
+    },
     "./chains": {
       "types": "./dist/src/chains.d.ts",
       "default": "./dist/src/chains.js"
@@ -157,6 +161,9 @@
       ],
       "devnet": [
         "./dist/src/devnet/index"
+      ],
+      "boss": [
+        "./dist/src/boss/index"
       ]
     }
   },
