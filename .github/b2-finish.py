@@ -2,40 +2,31 @@ import json
 from pathlib import Path
 
 
-def replace_once(path: str, old: str, new: str, label: str) -> None:
+def replace_first(path: str, old: str, new: str, label: str) -> None:
     file_path = Path(path)
     text = file_path.read_text()
-    count = text.count(old)
-    if count != 1:
-        raise SystemExit(f'{label}: expected one anchor, found {count}')
-    file_path.write_text(text.replace(old, new))
+    if old not in text:
+        raise SystemExit(f'{label}: anchor not found')
+    file_path.write_text(text.replace(old, new, 1))
 
 
-replace_once(
+replace_first(
     'packages/synapse-sdk/src/types.ts',
     "import type { Chain } from '@filoz/synapse-core/chains'\n",
     "import type { BossDeploymentManifest } from '@filoz/synapse-core/boss'\n"
     "import type { Chain } from '@filoz/synapse-core/chains'\n",
     'Boss deployment type import',
 )
-replace_once(
-    'packages/synapse-sdk/src/types.ts',
-    "  /** Whether to use CDN for retrievals (default: false) */\n  withCDN?: boolean\n\n  /**\n   * Application identifier for namespace isolation.",
-    "  /** Whether to use CDN for retrievals (default: false) */\n  withCDN?: boolean\n\n"
-    "  /** Explicit Filecoin Boss deployment manifests. No network default is inferred. */\n"
-    "  bossDeployments?: readonly BossDeploymentManifest[]\n\n"
-    "  /**\n   * Application identifier for namespace isolation.",
-    'SynapseOptions Boss deployment field',
-)
-replace_once(
-    'packages/synapse-sdk/src/types.ts',
-    "  /** Whether to use CDN for retrievals (default: false) */\n  withCDN?: boolean\n\n  /**\n   * Application identifier for namespace isolation.",
-    "  /** Whether to use CDN for retrievals (default: false) */\n  withCDN?: boolean\n\n"
-    "  /** Explicit Filecoin Boss deployment manifests. No network default is inferred. */\n"
-    "  bossDeployments?: readonly BossDeploymentManifest[]\n\n"
-    "  /**\n   * Application identifier for namespace isolation.",
-    'SynapseFromClientOptions Boss deployment field',
-)
+for label in ('SynapseOptions', 'SynapseFromClientOptions'):
+    replace_first(
+        'packages/synapse-sdk/src/types.ts',
+        "  /** Whether to use CDN for retrievals (default: false) */\n  withCDN?: boolean\n\n  /**\n   * Application identifier for namespace isolation.",
+        "  /** Whether to use CDN for retrievals (default: false) */\n  withCDN?: boolean\n\n"
+        "  /** Explicit Filecoin Boss deployment manifests. No network default is inferred. */\n"
+        "  bossDeployments?: readonly BossDeploymentManifest[]\n\n"
+        "  /**\n   * Application identifier for namespace isolation.",
+        f'{label} Boss deployment field',
+    )
 
 index_path = Path('packages/synapse-sdk/src/index.ts')
 index_text = index_path.read_text()
