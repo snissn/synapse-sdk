@@ -107,11 +107,7 @@ export function submitBossUsageClaimCall(options: {
   } as const
 }
 
-export function topUpBossFixedBudgetCall(options: {
-  account: Address
-  subscriptionId: Hex
-  newFixedBudget: bigint
-}) {
+export function topUpBossFixedBudgetCall(options: { account: Address; subscriptionId: Hex; newFixedBudget: bigint }) {
   if (options.newFixedBudget < 0n) throw new ValidationError('newFixedBudget cannot be negative')
   return {
     abi: bossAccountAbi,
