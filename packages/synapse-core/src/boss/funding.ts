@@ -53,19 +53,17 @@ export function planBossFunding(input: BossFundingPlanInput): BossFundingPlan {
     throw new ValidationError('A subscription cannot exist before its Boss account')
   }
 
-  const hasCurrentBudget = input.currentFixedBudget !== undefined
-  const hasRequestedBudget = input.requestedFixedBudget !== undefined
-  if (hasCurrentBudget !== hasRequestedBudget) {
+  const currentFixedBudget = input.currentFixedBudget
+  const requestedFixedBudget = input.requestedFixedBudget
+  if ((currentFixedBudget === undefined) !== (requestedFixedBudget === undefined)) {
     throw new ValidationError('currentFixedBudget and requestedFixedBudget must be supplied together')
   }
-  if (hasRequestedBudget && !input.subscriptionExists) {
+  if (requestedFixedBudget !== undefined && !input.subscriptionExists) {
     throw new ValidationError('Use initialFixedBudget when accepting a new subscription')
   }
 
   let topUpDelta = 0n
-  if (hasCurrentBudget && hasRequestedBudget) {
-    const currentFixedBudget = input.currentFixedBudget
-    const requestedFixedBudget = input.requestedFixedBudget
+  if (currentFixedBudget !== undefined && requestedFixedBudget !== undefined) {
     requireNonNegative(currentFixedBudget, 'currentFixedBudget')
     requireNonNegative(requestedFixedBudget, 'requestedFixedBudget')
     if (requestedFixedBudget < currentFixedBudget) {
@@ -94,8 +92,8 @@ export function planBossFunding(input: BossFundingPlanInput): BossFundingPlan {
   }
   if (!input.accountDeployed) steps.push({ kind: 'deploy-account' })
   if (!input.subscriptionExists) steps.push({ kind: 'accept-offer' })
-  if (topUpDelta !== 0n && input.requestedFixedBudget !== undefined) {
-    steps.push({ kind: 'top-up-fixed-budget', newFixedBudget: input.requestedFixedBudget })
+  if (topUpDelta !== 0n && requestedFixedBudget !== undefined) {
+    steps.push({ kind: 'top-up-fixed-budget', newFixedBudget: requestedFixedBudget })
   }
 
   return { requiredApproval, steps }
