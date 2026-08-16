@@ -42,6 +42,29 @@ describe('Boss funding plans', () => {
     ])
   })
 
+  it('does not restore stale oversized allowances after revocation', () => {
+    const plan = planBossFunding({
+      depositAmount: 0n,
+      accountDeployed: false,
+      subscriptionExists: false,
+      requiredRatePerEpoch: 5n,
+      initialFixedBudget: 50n,
+      requiredMaxLockupPeriod: 2_880n,
+      approval: {
+        ...unapproved,
+        rateAllowance: 1_000n,
+        lockupAllowance: 2_000n,
+        maxLockupPeriod: 10_000n,
+      },
+    })
+
+    assert.deepEqual(plan.requiredApproval, {
+      rateAllowance: 15n,
+      lockupAllowance: 70n,
+      maxLockupPeriod: 2_880n,
+    })
+  })
+
   it('returns no hidden action when every requested change is already satisfied', () => {
     const plan = planBossFunding({
       depositAmount: 0n,
