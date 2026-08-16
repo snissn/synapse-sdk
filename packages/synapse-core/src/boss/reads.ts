@@ -61,9 +61,7 @@ export function bossQuoteSnapshotCall(
   } as const
 }
 
-export function bossClaimSnapshotCall(
-  options: BossReadOptions & { subscriptionId: Hex; claim: UsageClaim }
-) {
+export function bossClaimSnapshotCall(options: BossReadOptions & { subscriptionId: Hex; claim: UsageClaim }) {
   return {
     abi: bossStateViewAbi,
     address: options.stateView,
