@@ -1,14 +1,14 @@
 /* globals describe it */
 
-import type { BossAcceptanceInput, BossFundingPlan, BossDeploymentManifest } from '@filoz/synapse-core/boss'
+import type { BossAcceptanceInput, BossDeploymentManifest, BossFundingPlan } from '@filoz/synapse-core/boss'
 import { calibration } from '@filoz/synapse-core/chains'
 import { assert } from 'chai'
-import { createWalletClient, custom, type Hash, type TransactionReceipt } from 'viem'
+import { type Address, createWalletClient, custom, type Hash, type TransactionReceipt } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { BossServicesPartialCompletionError, ServicesManager } from '../services/index.ts'
 
 const account = privateKeyToAccount('0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8411c9e87c84c08e2b')
-const address = (digit: string) => `0x${digit.repeat(40)}` as const
+const address = (digit: string): Address => `0x${digit.repeat(40)}` as Address
 const hash = (digit: string) => `0x${digit.repeat(64)}` as Hash
 
 const deployment = {
@@ -91,6 +91,9 @@ describe('ServicesManager', () => {
       async waitForReceipt(transactionHash) {
         return { transactionHash } as TransactionReceipt
       },
+      async resolveAccount() {
+        return address('b')
+      },
       async execute(request) {
         calls.push(request.functionName)
         return { hash: request.functionName === 'createAccount' ? hash('e') : hash('f'), receipt: null }
@@ -126,6 +129,9 @@ describe('ServicesManager', () => {
       async waitForReceipt(transactionHash) {
         return { transactionHash } as TransactionReceipt
       },
+      async resolveAccount() {
+        return address('b')
+      },
       async execute(request) {
         if (request.functionName === 'acceptOffer') throw new Error('accept failed')
         return { hash: hash('e'), receipt: null }
@@ -159,6 +165,9 @@ describe('ServicesManager', () => {
           throw new Error('not used')
         },
       },
+      async resolveAccount() {
+        return address('b')
+      },
       async execute(request) {
         functions.push(request.functionName)
         return { hash: hash('f'), receipt: null }
@@ -172,6 +181,35 @@ describe('ServicesManager', () => {
     await manager.stop({ account: address('b'), subscriptionId })
 
     assert.deepEqual(functions, ['syncRate', 'pause', 'resume', 'terminate'])
+  })
+
+  it('rejects an account that does not match the factory prediction before spending', async () => {
+    let spent = false
+    const manager = new ServicesManager({
+      client,
+      deployments: [deployment],
+      payments: {
+        async deposit() {
+          spent = true
+          return hash('c')
+        },
+        async approveService() {
+          spent = true
+          return hash('d')
+        },
+      },
+      async resolveAccount() {
+        return address('c')
+      },
+    })
+
+    try {
+      await manager.attach({ owner: account.address, account: address('b'), acceptance, plan })
+      assert.fail('expected account mismatch')
+    } catch (error) {
+      assert.match(String(error), /does not match predicted account/)
+      assert.isFalse(spent)
+    }
   })
 
   it('fails closed when the active chain has no explicit Boss manifest', () => {
