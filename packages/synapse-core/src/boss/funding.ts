@@ -68,10 +68,18 @@ export function planBossFunding(input: BossFundingPlanInput): BossFundingPlan {
 
   const rateUsageIncrease = input.subscriptionExists ? 0n : input.requiredRatePerEpoch
   const lockupUsageIncrease = (input.subscriptionExists ? 0n : input.initialFixedBudget) + topUpDelta
+  const minimumRateAllowance = input.approval.rateUsage + rateUsageIncrease
+  const minimumLockupAllowance = input.approval.lockupUsage + lockupUsageIncrease
   const requiredApproval = {
-    rateAllowance: max(input.approval.rateAllowance, input.approval.rateUsage + rateUsageIncrease),
-    lockupAllowance: max(input.approval.lockupAllowance, input.approval.lockupUsage + lockupUsageIncrease),
-    maxLockupPeriod: max(input.approval.maxLockupPeriod, input.requiredMaxLockupPeriod),
+    rateAllowance: input.approval.isApproved
+      ? max(input.approval.rateAllowance, minimumRateAllowance)
+      : minimumRateAllowance,
+    lockupAllowance: input.approval.isApproved
+      ? max(input.approval.lockupAllowance, minimumLockupAllowance)
+      : minimumLockupAllowance,
+    maxLockupPeriod: input.approval.isApproved
+      ? max(input.approval.maxLockupPeriod, input.requiredMaxLockupPeriod)
+      : input.requiredMaxLockupPeriod,
   }
 
   const steps: BossFundingStep[] = []
