@@ -42,8 +42,8 @@ export function createBossAccountCall(options: {
 
 export function acceptBossOfferCall(options: { account: Address; input: BossAcceptanceInput }) {
   const { commissionBps } = options.input.offer
-  if (commissionBps < 0n || commissionBps > 65_535n) {
-    throw new ValidationError('offer.commissionBps exceeds uint16')
+  if (commissionBps < 0n || commissionBps > 10_000n) {
+    throw new ValidationError('offer.commissionBps exceeds the Boss 10,000-bps cap')
   }
 
   const input = {
