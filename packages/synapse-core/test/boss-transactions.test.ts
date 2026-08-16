@@ -61,12 +61,12 @@ describe('Boss transaction builders', () => {
     assert.doesNotThrow(() => encodeFunctionData(call))
   })
 
-  it('rejects a commission outside the on-chain uint16 boundary', () => {
+  it('rejects a commission above the Boss protocol cap', () => {
     assert.throws(() =>
       acceptBossOfferCall({
         account,
         input: {
-          offer: { ...bossVector.offer, commissionBps: 65_536n },
+          offer: { ...bossVector.offer, commissionBps: 10_001n },
           providerSignature: '0x1234',
           resource: bossVector.resource,
           resourceData: '0x',
