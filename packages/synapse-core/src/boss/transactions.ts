@@ -41,11 +41,24 @@ export function createBossAccountCall(options: {
 }
 
 export function acceptBossOfferCall(options: { account: Address; input: BossAcceptanceInput }) {
+  const { commissionBps } = options.input.offer
+  if (commissionBps < 0n || commissionBps > 65_535n) {
+    throw new ValidationError('offer.commissionBps exceeds uint16')
+  }
+
+  const input = {
+    ...options.input,
+    offer: {
+      ...options.input.offer,
+      commissionBps: Number(commissionBps),
+    },
+  }
+
   return {
     abi: bossAccountAbi,
     address: options.account,
     functionName: 'acceptOffer',
-    args: [options.input],
+    args: [input],
   } as const
 }
 
