@@ -15,6 +15,7 @@ import {
 } from 'viem'
 import { FilBeamService } from './filbeam/index.ts'
 import { PaymentsService } from './payments/index.ts'
+import { ServicesManager } from './services/index.ts'
 import { SPRegistryService } from './sp-registry/index.ts'
 import { StorageManager } from './storage/manager.ts'
 import type { PDPProvider, SynapseFromClientOptions, SynapseOptions } from './types.ts'
@@ -32,6 +33,7 @@ export class Synapse {
   private readonly _storageManager: StorageManager
   private readonly _filbeamService: FilBeamService
   private readonly _providers: SPRegistryService
+  private readonly _services: ServicesManager
 
   private readonly _client: Client<Transport, Chain, Account, PublicRpcSchema, PublicActions<Transport, Chain>>
   private readonly _sessionClient: Client<Transport, Chain, SessionKeyAccount<'Secp256k1'>> | undefined
@@ -88,6 +90,7 @@ export class Synapse {
       withCDN: options.withCDN,
       source: options.source,
       sessionClient: options.sessionKey?.client,
+      bossDeployments: options.bossDeployments,
     })
   }
 
@@ -101,6 +104,11 @@ export class Synapse {
     this._filbeamService = new FilBeamService(this._chain)
     this._warmStorageService = new WarmStorageService({ client: options.client })
     this._payments = new PaymentsService({ client: options.client })
+    this._services = new ServicesManager({
+      client: this._client,
+      payments: this._payments,
+      deployments: options.bossDeployments,
+    })
 
     // Initialize StorageManager
     this._storageManager = new StorageManager({
@@ -129,6 +137,15 @@ export class Synapse {
    */
   get payments(): PaymentsService {
     return this._payments
+  }
+
+  /**
+   * Gets the Filecoin Boss services manager.
+   *
+   * Spending and approval changes remain explicit through returned funding plans.
+   */
+  get services(): ServicesManager {
+    return this._services
   }
 
   /**
