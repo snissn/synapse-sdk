@@ -16,6 +16,16 @@ export type BossReadOptions = {
   account: Address
 }
 
+export type BossPredictAccountOptions = {
+  factory: Address
+  owner: Address
+  filecoinPay: Address
+  serviceRegistry: Address
+  adapterRegistry: Address
+  accountVersion?: bigint
+  accountCreationCode?: Hex
+}
+
 export function bossAccountSnapshotCall(options: BossReadOptions) {
   return {
     abi: bossStateViewAbi,
@@ -70,15 +80,7 @@ export function bossClaimSnapshotCall(options: BossReadOptions & { subscriptionI
   } as const
 }
 
-export function bossPredictAccountCall(options: {
-  factory: Address
-  owner: Address
-  filecoinPay: Address
-  serviceRegistry: Address
-  adapterRegistry: Address
-  accountVersion?: bigint
-  accountCreationCode?: Hex
-}) {
+export function bossPredictAccountCall(options: BossPredictAccountOptions) {
   return {
     abi: bossFactoryAbi,
     address: options.factory,
@@ -156,4 +158,29 @@ export async function readBossClaimSnapshot(
   options: BossReadOptions & { subscriptionId: Hex; claim: UsageClaim }
 ) {
   return readContract(toReadClient(client), bossClaimSnapshotCall(options))
+}
+
+export async function readBossPredictedAccount(client: Client<Transport, Chain>, options: BossPredictAccountOptions) {
+  return readContract(toReadClient(client), bossPredictAccountCall(options))
+}
+
+export async function readBossProviderRecord(
+  client: Client<Transport, Chain>,
+  options: { registry: Address; provider: Address }
+) {
+  return readContract(toReadClient(client), bossProviderCall(options))
+}
+
+export async function readBossServiceRecord(
+  client: Client<Transport, Chain>,
+  options: { registry: Address; provider: Address; serviceId: Hex }
+) {
+  return readContract(toReadClient(client), bossServiceCall(options))
+}
+
+export async function readBossAdapterRecord(
+  client: Client<Transport, Chain>,
+  options: { registry: Address; adapter: Address }
+) {
+  return readContract(toReadClient(client), bossAdapterCall(options))
 }
