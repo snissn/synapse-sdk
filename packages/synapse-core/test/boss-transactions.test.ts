@@ -57,7 +57,26 @@ describe('Boss transaction builders', () => {
     assert.equal(call.functionName, 'acceptOffer')
     assert.equal(call.address, account)
     assert.equal(call.args[0].offer.serviceId, bossVector.offer.serviceId)
+    assert.equal(call.args[0].offer.commissionBps, Number(bossVector.offer.commissionBps))
     assert.doesNotThrow(() => encodeFunctionData(call))
+  })
+
+  it('rejects a commission outside the on-chain uint16 boundary', () => {
+    assert.throws(() =>
+      acceptBossOfferCall({
+        account,
+        input: {
+          offer: { ...bossVector.offer, commissionBps: 65_536n },
+          providerSignature: '0x1234',
+          resource: bossVector.resource,
+          resourceData: '0x',
+          pricingData: '0x',
+          caps: bossVector.caps,
+          initialFixedBudget: 0n,
+          accessGrantHash: hash('0'),
+        },
+      })
+    )
   })
 
   it('builds lifecycle calls as explicit requests only', () => {
