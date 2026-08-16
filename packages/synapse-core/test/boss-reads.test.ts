@@ -2,14 +2,18 @@
 
 import assert from 'assert'
 import type { Address, Hex } from 'viem'
+import { createPublicClient, custom, encodeFunctionResult } from 'viem'
 import {
   bossAccountSnapshotCall,
   bossClaimSnapshotCall,
   bossQuoteSnapshotCall,
+  bossStateViewAbi,
   bossSubscriptionPageCall,
   bossSubscriptionSnapshotCall,
+  readBossAccountSnapshot,
   ResourceKind,
 } from '../src/boss/index.ts'
+import { calibration } from '../src/chains.ts'
 
 const address = (digit: string): Address => `0x${digit.repeat(40)}` as Address
 const hash = (digit: string): Hex => `0x${digit.repeat(64)}` as Hex
@@ -47,6 +51,35 @@ describe('Boss read calls', () => {
       subscriptionId,
     ])
     assert.deepEqual(bossSubscriptionPageCall({ stateView, account, offset: 4n, limit: 32n }).args, [account, 4n, 32n])
+  })
+
+  it('reads one account snapshot with one public-client call and no signer', async () => {
+    const expected = {
+      account,
+      owner: address('3'),
+      payer: address('3'),
+      filecoinPay: address('4'),
+      serviceRegistry: address('5'),
+      adapterRegistry: address('6'),
+      factory: address('7'),
+      bundles: address('8'),
+      accountVersion: 1n,
+      subscriptionCount: 2n,
+    }
+    let ethCalls = 0
+    const client = createPublicClient({
+      chain: calibration,
+      transport: custom({
+        async request({ method }) {
+          assert.equal(method, 'eth_call')
+          ethCalls += 1
+          return encodeFunctionResult({ abi: bossStateViewAbi, functionName: 'account', result: expected })
+        },
+      }),
+    })
+
+    assert.deepEqual(await readBossAccountSnapshot(client, { stateView, account }), expected)
+    assert.equal(ethCalls, 1)
   })
 
   it('builds exact quote and claim preflight reads', () => {
