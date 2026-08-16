@@ -2,6 +2,7 @@
 
 import assert from 'assert'
 import type { Address, Hex } from 'viem'
+import { encodeFunctionData } from 'viem'
 import {
   acceptBossOfferCall,
   createBossAccountCall,
@@ -35,6 +36,7 @@ describe('Boss transaction builders', () => {
     assert.equal(call.args[0], address('4'))
     assert.equal(call.args[4], 1n)
     assert.ok(call.args[5].startsWith('0x'))
+    assert.doesNotThrow(() => encodeFunctionData(call))
   })
 
   it('builds an exact offer-acceptance call', () => {
@@ -55,21 +57,30 @@ describe('Boss transaction builders', () => {
     assert.equal(call.functionName, 'acceptOffer')
     assert.equal(call.address, account)
     assert.equal(call.args[0].offer.serviceId, bossVector.offer.serviceId)
+    assert.doesNotThrow(() => encodeFunctionData(call))
   })
 
   it('builds lifecycle calls as explicit requests only', () => {
-    assert.deepEqual(syncBossRateCall({ account, subscriptionId }).args, [subscriptionId])
-    assert.deepEqual(pauseBossSubscriptionCall({ account, subscriptionId }).args, [subscriptionId])
-    assert.deepEqual(resumeBossSubscriptionCall({ account, subscriptionId }).args, [subscriptionId])
-    assert.deepEqual(terminateBossSubscriptionCall({ account, subscriptionId }).args, [subscriptionId])
-    assert.deepEqual(settleBossSubscriptionCall({ account, subscriptionId, untilEpoch: 123n }).args, [
-      subscriptionId,
-      123n,
-    ])
-    assert.deepEqual(topUpBossFixedBudgetCall({ account, subscriptionId, newFixedBudget: 50n }).args, [
-      subscriptionId,
-      50n,
-    ])
+    const sync = syncBossRateCall({ account, subscriptionId })
+    const pause = pauseBossSubscriptionCall({ account, subscriptionId })
+    const resume = resumeBossSubscriptionCall({ account, subscriptionId })
+    const terminate = terminateBossSubscriptionCall({ account, subscriptionId })
+    const settle = settleBossSubscriptionCall({ account, subscriptionId, untilEpoch: 123n })
+    const topUp = topUpBossFixedBudgetCall({ account, subscriptionId, newFixedBudget: 50n })
+
+    assert.deepEqual(sync.args, [subscriptionId])
+    assert.deepEqual(pause.args, [subscriptionId])
+    assert.deepEqual(resume.args, [subscriptionId])
+    assert.deepEqual(terminate.args, [subscriptionId])
+    assert.deepEqual(settle.args, [subscriptionId, 123n])
+    assert.deepEqual(topUp.args, [subscriptionId, 50n])
+
+    assert.doesNotThrow(() => encodeFunctionData(sync))
+    assert.doesNotThrow(() => encodeFunctionData(pause))
+    assert.doesNotThrow(() => encodeFunctionData(resume))
+    assert.doesNotThrow(() => encodeFunctionData(terminate))
+    assert.doesNotThrow(() => encodeFunctionData(settle))
+    assert.doesNotThrow(() => encodeFunctionData(topUp))
   })
 
   it('builds reporter claim calldata without calculating a trusted charge', () => {
@@ -82,5 +93,6 @@ describe('Boss transaction builders', () => {
 
     assert.equal(call.functionName, 'submitUsageClaim')
     assert.deepEqual(call.args, [subscriptionId, bossVector.usageClaim, '0xabcd'])
+    assert.doesNotThrow(() => encodeFunctionData(call))
   })
 })
