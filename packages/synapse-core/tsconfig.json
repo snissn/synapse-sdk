@@ -11,6 +11,7 @@
     "entryPoints": [
       "src/abis/index.ts",
       "src/auction/index.ts",
+      "src/boss/index.ts",
       "src/endorsements/index.ts",
       "src/erc20/index.ts",
       "src/errors/index.ts",

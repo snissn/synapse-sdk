@@ -11,6 +11,7 @@
 
 export * as abis from './abis/index.ts'
 export * as auction from './auction/index.ts'
+export * as boss from './boss/index.ts'
 export * as chains from './chains.ts'
 export * as endorsements from './endorsements/index.ts'
 export * as erc20 from './erc20/index.ts'
