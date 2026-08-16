@@ -97,7 +97,7 @@ export function hashServiceOffer(offer: ServiceOffer): Hex {
           ],
         },
       ],
-      [SERVICE_OFFER_TYPEHASH, offer]
+      [SERVICE_OFFER_TYPEHASH, { ...offer, commissionBps: Number(offer.commissionBps) }]
     )
   )
 }
