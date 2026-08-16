@@ -10,8 +10,8 @@ import {
   bossStateViewAbi,
   bossSubscriptionPageCall,
   bossSubscriptionSnapshotCall,
-  readBossAccountSnapshot,
   ResourceKind,
+  readBossAccountSnapshot,
 } from '../src/boss/index.ts'
 import { calibration } from '../src/chains.ts'
 
