@@ -46,11 +46,7 @@ describe('Boss read calls', () => {
       account,
       subscriptionId,
     ])
-    assert.deepEqual(bossSubscriptionPageCall({ stateView, account, offset: 4n, limit: 32n }).args, [
-      account,
-      4n,
-      32n,
-    ])
+    assert.deepEqual(bossSubscriptionPageCall({ stateView, account, offset: 4n, limit: 32n }).args, [account, 4n, 32n])
   })
 
   it('builds exact quote and claim preflight reads', () => {
