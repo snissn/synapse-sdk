@@ -82,11 +82,14 @@ export function planBossFunding(input: BossFundingPlanInput): BossFundingPlan {
 
   const steps: BossFundingStep[] = []
   if (input.depositAmount !== 0n) steps.push({ kind: 'deposit', amount: input.depositAmount })
+
+  const consumesOperatorApproval = !input.subscriptionExists || topUpDelta !== 0n
   if (
-    !input.approval.isApproved ||
-    input.approval.rateAllowance < requiredApproval.rateAllowance ||
-    input.approval.lockupAllowance < requiredApproval.lockupAllowance ||
-    input.approval.maxLockupPeriod < requiredApproval.maxLockupPeriod
+    consumesOperatorApproval &&
+    (!input.approval.isApproved ||
+      input.approval.rateAllowance < requiredApproval.rateAllowance ||
+      input.approval.lockupAllowance < requiredApproval.lockupAllowance ||
+      input.approval.maxLockupPeriod < requiredApproval.maxLockupPeriod)
   ) {
     steps.push({ kind: 'approve-operator', ...requiredApproval })
   }
