@@ -1,0 +1,57 @@
+name: B2 finish and qualify
+
+on:
+  push:
+    branches:
+      - gpt56/issue-7-synapse-services-manager
+    paths:
+      - .github/workflows/b2-finish.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: b2-finish-and-qualify
+  cancel-in-progress: false
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: gpt56/issue-7-synapse-services-manager
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          package-manager-cache: true
+      - name: Apply deterministic integration edits
+        run: python3 .github/b2-finish.py
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Format changed TypeScript and JSON
+        run: >-
+          pnpm exec biome check --write
+          packages/synapse-sdk/package.json
+          packages/synapse-sdk/tsconfig.json
+          packages/synapse-sdk/src/index.ts
+          packages/synapse-sdk/src/synapse.ts
+          packages/synapse-sdk/src/types.ts
+          packages/synapse-sdk/src/services
+          packages/synapse-sdk/src/test/services-manager.test.ts
+      - name: Build, lint, and test Synapse SDK
+        run: |
+          pnpm --filter @filoz/synapse-sdk run build
+          pnpm --filter @filoz/synapse-sdk run lint
+          pnpm --filter @filoz/synapse-sdk run test
+      - name: Commit qualified candidate
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/synapse-sdk
+          git diff --cached --check
+          git commit -m "feat(synapse-sdk): implement explicit Boss lifecycle manager"
+          git push origin HEAD:gpt56/issue-7-synapse-services-manager
