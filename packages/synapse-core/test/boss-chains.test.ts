@@ -81,16 +81,25 @@ describe('Boss artifacts and deployments', () => {
     assert.equal(resolveBossDeployment(parsed.chainId, [parsed]), parsed)
   })
 
-  it('throws a typed error instead of returning zero addresses', () => {
-    assert.throws(
-      () => resolveBossDeployment(314_159, [parseBossDeploymentManifest(manifest)]),
-      (error: unknown) => BossDeploymentNotFoundError.is(error)
-    )
+  it('rejects zero addresses and mismatched protocol authority', () => {
     assert.throws(() =>
       parseBossDeploymentManifest({
         ...manifest,
         dependencies: { ...manifest.dependencies, filecoinPay: address('0') },
       })
+    )
+    assert.throws(() =>
+      parseBossDeploymentManifest({
+        ...manifest,
+        protocolCommit: '0'.repeat(40),
+      })
+    )
+  })
+
+  it('throws a typed error instead of returning zero addresses', () => {
+    assert.throws(
+      () => resolveBossDeployment(314_159, [parseBossDeploymentManifest(manifest)]),
+      (error: unknown) => BossDeploymentNotFoundError.is(error)
     )
   })
 })
