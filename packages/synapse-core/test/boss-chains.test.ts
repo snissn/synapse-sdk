@@ -5,6 +5,7 @@ import type { Address, Hex } from 'viem'
 import { keccak256 } from 'viem'
 import {
   BOSS_ACCOUNT_CREATION_CODE_HASH,
+  BOSS_ARTIFACT_PUBLICATION_COMMIT,
   BOSS_ARTIFACT_SOURCE_COMMIT,
   BossDeploymentNotFoundError,
   bossAbis,
@@ -67,6 +68,7 @@ const manifest = {
 
 describe('Boss artifacts and deployments', () => {
   it('exports the exact generated Boss artifact authority', () => {
+    assert.equal(BOSS_ARTIFACT_PUBLICATION_COMMIT, '4295d48f322d5c8950c01fa6f6d92d2391156d19')
     assert.equal(bossArtifacts.sourceCommit, BOSS_ARTIFACT_SOURCE_COMMIT)
     assert.equal(bossArtifacts.protocolCommit, BOSS_ARTIFACT_SOURCE_COMMIT)
     assert.equal(keccak256(bossAccountCreationCode), BOSS_ACCOUNT_CREATION_CODE_HASH)
