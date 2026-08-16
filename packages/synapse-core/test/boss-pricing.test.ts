@@ -12,6 +12,7 @@ import {
 
 const USDFC = 10n ** 18n
 const EPOCHS_PER_30_DAYS = 86_400n
+const MAX_UINT256 = (1n << 256n) - 1n
 
 describe('Boss pricing', () => {
   it('matches the flat and one-TiB Solidity floor vectors', () => {
@@ -57,6 +58,25 @@ describe('Boss pricing', () => {
         chargedGross: 4n * USDFC,
         remainingWindowGross: 0n,
         remainingLifetimeGross: 3n * USDFC,
+      }
+    )
+  })
+
+  it('preserves unlimited sentinel semantics after a charge', () => {
+    assert.deepEqual(
+      authorizeMeteredCharge({
+        rawGross: 3n,
+        maxSingleCharge: 3n,
+        windowGross: 10n,
+        maxChargePerWindow: MAX_UINT256,
+        lifetimeGross: 20n,
+        lifetimeCapGross: MAX_UINT256,
+        fixedLockup: 3n,
+      }),
+      {
+        chargedGross: 3n,
+        remainingWindowGross: MAX_UINT256,
+        remainingLifetimeGross: MAX_UINT256,
       }
     )
   })
