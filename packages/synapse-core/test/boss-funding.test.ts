@@ -42,7 +42,7 @@ describe('Boss funding plans', () => {
     ])
   })
 
-  it('returns no hidden action when every prerequisite is already satisfied', () => {
+  it('returns no hidden action when every requested change is already satisfied', () => {
     const plan = planBossFunding({
       depositAmount: 0n,
       accountDeployed: true,
@@ -50,14 +50,7 @@ describe('Boss funding plans', () => {
       requiredRatePerEpoch: 5n,
       initialFixedBudget: 50n,
       requiredMaxLockupPeriod: 2_880n,
-      approval: {
-        isApproved: true,
-        rateAllowance: 100n,
-        lockupAllowance: 100n,
-        rateUsage: 10n,
-        lockupUsage: 20n,
-        maxLockupPeriod: 2_880n,
-      },
+      approval: unapproved,
     })
 
     assert.deepEqual(plan.steps, [])
