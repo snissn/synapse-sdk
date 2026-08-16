@@ -55,16 +55,13 @@ describe('Boss read calls', () => {
 
   it('reads one account snapshot with one public-client call and no signer', async () => {
     const expected = {
-      account,
       owner: address('3'),
       payer: address('3'),
       filecoinPay: address('4'),
       serviceRegistry: address('5'),
       adapterRegistry: address('6'),
       factory: address('7'),
-      bundles: address('8'),
       accountVersion: 1n,
-      subscriptionCount: 2n,
     }
     let ethCalls = 0
     const client = createPublicClient({
