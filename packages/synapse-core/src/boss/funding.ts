@@ -1,13 +1,7 @@
 import { ValidationError } from '../errors/base.ts'
+import type { operatorApprovals } from '../pay/operator-approvals.ts'
 
-export type BossOperatorApprovalState = {
-  isApproved: boolean
-  rateAllowance: bigint
-  lockupAllowance: bigint
-  rateUsage: bigint
-  lockupUsage: bigint
-  maxLockupPeriod: bigint
-}
+export type BossOperatorApprovalState = operatorApprovals.OutputType
 
 export type BossFundingStep =
   | { kind: 'deposit'; amount: bigint }
