@@ -2,7 +2,10 @@ import type { Address, Hex } from 'viem'
 import * as z from 'zod'
 import { isSynapseError, SynapseError } from '../errors/base.ts'
 import { zAddress, zHex } from '../utils/schemas.ts'
-import { BOSS_ACCOUNT_CREATION_CODE_HASH } from './generated.ts'
+import {
+  BOSS_ACCOUNT_CREATION_CODE_HASH,
+  BOSS_ARTIFACT_SOURCE_COMMIT,
+} from './generated.ts'
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 const nonZeroAddressSchema = zAddress.refine((value) => value !== ZERO_ADDRESS, 'Zero address')
@@ -49,6 +52,10 @@ export const bossDeploymentManifestSchema = z
       .strict(),
   })
   .strict()
+  .refine(
+    (manifest) => manifest.protocolCommit === BOSS_ARTIFACT_SOURCE_COMMIT,
+    'Protocol commit does not match the packaged Boss artifact source'
+  )
   .refine(
     (manifest) => manifest.accountCreationCodeHash === BOSS_ACCOUNT_CREATION_CODE_HASH,
     'BossAccount creation code hash does not match the packaged artifact'
