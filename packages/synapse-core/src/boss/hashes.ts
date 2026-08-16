@@ -1,22 +1,7 @@
-import {
-  concatHex,
-  encodeAbiParameters,
-  keccak256,
-  stringToHex,
-  type Address,
-  type Hex,
-} from 'viem'
-import type {
-  AcceptanceHashInput,
-  BossDomain,
-  CapPolicy,
-  ResourceRef,
-  ServiceOffer,
-  UsageClaim,
-} from './types.ts'
+import { type Address, concatHex, encodeAbiParameters, type Hex, keccak256, stringToHex } from 'viem'
+import type { AcceptanceHashInput, BossDomain, CapPolicy, ResourceRef, ServiceOffer, UsageClaim } from './types.ts'
 
-const EIP712_DOMAIN_TYPE =
-  'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
+const EIP712_DOMAIN_TYPE = 'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
 const SERVICE_OFFER_TYPE =
   'ServiceOffer(bytes32 serviceId,uint64 offerVersion,address provider,address signingKey,address beneficiary,address reporter,address token,address resourceAdapter,address pricingAdapter,bytes32 serviceType,uint8 billingKind,uint8 assuranceKind,uint8 dependencyKind,uint8 activationKind,uint8 terminationBillingKind,bytes32 pricingDataHash,bytes32 termsHash,bytes32 accessScopeHash,uint64 validAfterEpoch,uint64 validUntilEpoch,uint64 requiredLockupPeriod,uint64 quoteTtlEpochs,uint16 commissionBps,address commissionRecipient,bool pauseAllowed,uint256 providerMaxRatePerEpoch,uint256 providerMaxFixedLockup,uint256 nonce)'
 const CAP_POLICY_TYPE =
@@ -185,20 +170,8 @@ export function hashUsageClaim(subscriptionId: Hex, claim: UsageClaim): Hex {
 export function getBossDomainSeparator(domain: BossDomain): Hex {
   return keccak256(
     encodeAbiParameters(
-      [
-        { type: 'bytes32' },
-        { type: 'bytes32' },
-        { type: 'bytes32' },
-        { type: 'uint256' },
-        { type: 'address' },
-      ],
-      [
-        EIP712_DOMAIN_TYPEHASH,
-        NAME_HASH,
-        VERSION_HASH,
-        domain.chainId,
-        domain.verifyingContract,
-      ]
+      [{ type: 'bytes32' }, { type: 'bytes32' }, { type: 'bytes32' }, { type: 'uint256' }, { type: 'address' }],
+      [EIP712_DOMAIN_TYPEHASH, NAME_HASH, VERSION_HASH, domain.chainId, domain.verifyingContract]
     )
   )
 }
@@ -207,11 +180,7 @@ export function hashTypedData(domainSeparator: Hex, structHash: Hex): Hex {
   return keccak256(concatHex(['0x1901', domainSeparator, structHash]))
 }
 
-export function deriveSubscriptionId(input: {
-  account: Address
-  offerHash: Hex
-  resourceKey: Hex
-}): Hex {
+export function deriveSubscriptionId(input: { account: Address; offerHash: Hex; resourceKey: Hex }): Hex {
   return keccak256(
     encodeAbiParameters(
       [{ type: 'string' }, { type: 'address' }, { type: 'bytes32' }, { type: 'bytes32' }],

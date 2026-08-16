@@ -45,8 +45,7 @@ export const TerminationBillingKind = {
   ZERO_AFTER_REQUEST: 1,
   ADAPTER_DECIDES: 2,
 } as const
-export type TerminationBillingKind =
-  (typeof TerminationBillingKind)[keyof typeof TerminationBillingKind]
+export type TerminationBillingKind = (typeof TerminationBillingKind)[keyof typeof TerminationBillingKind]
 
 export const SubscriptionState = {
   NONE: 0,
@@ -98,10 +97,7 @@ const dependencyKindSchema = z.union([
   z.literal(DependencyKind.SOFT),
   z.literal(DependencyKind.HARD),
 ])
-const activationKindSchema = z.union([
-  z.literal(ActivationKind.IMMEDIATE),
-  z.literal(ActivationKind.PROVIDER_ACK),
-])
+const activationKindSchema = z.union([z.literal(ActivationKind.IMMEDIATE), z.literal(ActivationKind.PROVIDER_ACK)])
 const terminationBillingKindSchema = z.union([
   z.literal(TerminationBillingKind.PAY_THROUGH_FILECOIN_PAY_END),
   z.literal(TerminationBillingKind.ZERO_AFTER_REQUEST),

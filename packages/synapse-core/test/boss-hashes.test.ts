@@ -4,8 +4,6 @@ import assert from 'assert'
 import {
   ACCEPTANCE_TYPEHASH,
   CAP_POLICY_TYPEHASH,
-  SERVICE_OFFER_TYPEHASH,
-  USAGE_CLAIM_TYPEHASH,
   deriveSubscriptionId,
   getBossDomainSeparator,
   hashAcceptance,
@@ -14,6 +12,8 @@ import {
   hashServiceOffer,
   hashTypedData,
   hashUsageClaim,
+  SERVICE_OFFER_TYPEHASH,
+  USAGE_CLAIM_TYPEHASH,
 } from '../src/boss/index.ts'
 import { bossVector } from './fixtures/boss-v1.ts'
 

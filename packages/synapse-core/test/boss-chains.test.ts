@@ -1,8 +1,8 @@
 /* globals describe it */
 
 import assert from 'assert'
-import { keccak256 } from 'viem'
 import type { Address, Hex } from 'viem'
+import { keccak256 } from 'viem'
 import {
   BOSS_ACCOUNT_CREATION_CODE_HASH,
   BOSS_ARTIFACT_SOURCE_COMMIT,

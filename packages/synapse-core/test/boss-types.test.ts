@@ -3,14 +3,14 @@
 import assert from 'assert'
 import {
   BillingKind,
-  MAX_UINT256,
-  ResourceKind,
-  SubscriptionState,
   capPolicySchema,
   isNoExpiry,
   isUnlimitedCap,
+  MAX_UINT256,
+  ResourceKind,
   remainingCap,
   resourceRefSchema,
+  SubscriptionState,
   serviceOfferSchema,
   usageClaimSchema,
 } from '../src/boss/index.ts'

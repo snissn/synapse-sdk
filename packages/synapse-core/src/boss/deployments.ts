@@ -1,6 +1,6 @@
 import type { Address, Hex } from 'viem'
 import * as z from 'zod'
-import { SynapseError, isSynapseError } from '../errors/base.ts'
+import { isSynapseError, SynapseError } from '../errors/base.ts'
 import { zAddress, zHex } from '../utils/schemas.ts'
 import { BOSS_ACCOUNT_CREATION_CODE_HASH } from './generated.ts'
 
