@@ -1,5 +1,6 @@
 name: Generate and qualify B0
 
+# Run 4 validates viem's uint16 representation while preserving bigint at the public boundary.
 on:
   push:
     branches:
