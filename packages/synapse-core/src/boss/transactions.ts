@@ -83,11 +83,7 @@ export function terminateBossSubscriptionCall(options: { account: Address; subsc
   return accountSubscriptionCall(options, 'terminate')
 }
 
-export function settleBossSubscriptionCall(options: {
-  account: Address
-  subscriptionId: Hex
-  untilEpoch: bigint
-}) {
+export function settleBossSubscriptionCall(options: { account: Address; subscriptionId: Hex; untilEpoch: bigint }) {
   if (options.untilEpoch < 0n) throw new ValidationError('untilEpoch cannot be negative')
   return {
     abi: bossAccountAbi,
