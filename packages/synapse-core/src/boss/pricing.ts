@@ -67,8 +67,8 @@ export function authorizeMeteredCharge(input: MeteredAuthorization): {
 
   return {
     chargedGross,
-    remainingWindowGross: windowRemaining - chargedGross,
-    remainingLifetimeGross: lifetimeRemaining - chargedGross,
+    remainingWindowGross: remainingCap(input.maxChargePerWindow, input.windowGross + chargedGross),
+    remainingLifetimeGross: remainingCap(input.lifetimeCapGross, input.lifetimeGross + chargedGross),
   }
 }
 
