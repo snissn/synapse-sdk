@@ -15,10 +15,10 @@ const EPOCHS_PER_30_DAYS = 86_400n
 
 describe('Boss pricing', () => {
   it('matches the flat and one-TiB Solidity floor vectors', () => {
-    assert.deepEqual(
-      quoteFlatRate({ grossPricePerPeriod: USDFC, periodEpochs: EPOCHS_PER_30_DAYS }),
-      { ratePerEpoch: 11_574_074_074_074n, remainder: 6_400n }
-    )
+    assert.deepEqual(quoteFlatRate({ grossPricePerPeriod: USDFC, periodEpochs: EPOCHS_PER_30_DAYS }), {
+      ratePerEpoch: 11_574_074_074_074n,
+      remainder: 6_400n,
+    })
     assert.equal(
       quoteCapacityRate({
         sizeInBytes: 1n << 40n,
